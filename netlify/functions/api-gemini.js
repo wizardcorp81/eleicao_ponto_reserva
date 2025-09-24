@@ -8,6 +8,12 @@ const GEMINI_API_KEY = "AIzaSyCExYe6xQOFLxmkPFhFPjZYNSEnCi9cQzc";
 // URL da API do Gemini
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
 
+// Importa o conteúdo do arquivo JSON com as propostas
+const proposals = require('./propostas.json');
+
+// Importa a função para gerar o prompt do sistema do arquivo separado
+const { getSystemPrompt } = require('./system_prompt.js');
+
 // Função de tratamento da requisição
 export default async function handler(request) {
     if (request.method !== 'POST') {
@@ -17,17 +23,8 @@ export default async function handler(request) {
     try {
         const { userQuestion } = await request.json();
 
-        // O prompt de sistema instrui o modelo a responder com base nas propostas de campanha
-        const systemPrompt = `
-            Atue como Álvaro, o candidato a síndico do Condomínio Ponto Reserva.
-            Responda à seguinte pergunta baseando-se estritamente nas propostas de campanha que são:
-            - Contabilidade: Transparência e Prestação de Contas (relatórios digitais), Redução de Gastos (negociação de contratos), Geração de Receita (energia solar).
-            - Zeladoria: Troca do piso do estacionamento, manutenção e paisagismo, piscina com ozônio, iluminação e som na área gourmet, reforma do gradil e quadra.
-            - Gestão de Pessoas: Valorização dos colaboradores, canal de comunicação oficial, reuniões periódicas, eventos e feirinhas.
-            - Segurança: Controle de acesso (leitura de placas), monitoramento com mais câmeras, parcerias com a Polícia Militar.
-
-            Seja amigável e informativo, e mantenha a resposta focada no tema. A pergunta é: "${userQuestion}"
-        `;
+        // Obtém o prompt do sistema a partir da função importada
+        const systemPrompt = getSystemPrompt(proposals, userQuestion);
 
         const payload = {
             contents: [{ parts: [{ text: userQuestion }] }],
@@ -53,3 +50,4 @@ export default async function handler(request) {
         return new Response(JSON.stringify({ error: 'Erro interno do servidor' }), { status: 500 });
     }
 }
+
