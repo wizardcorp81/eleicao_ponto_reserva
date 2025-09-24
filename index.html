@@ -27,6 +27,18 @@
             padding: 3rem 2rem;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        @media (min-width: 640px) {
+            .header {
+                flex-direction: row;
+                text-align: left;
+                justify-content: flex-start;
+            }
         }
         .section-title {
             position: relative;
@@ -106,10 +118,13 @@
 <body class="p-6">
 
     <div class="container p-8">
-        <header class="header text-center">
-            <h1 class="text-3xl sm:text-4xl font-bold mb-2">Eleições para Síndico</h1>
-            <p class="text-xl sm:text-2xl font-light">Gestão 2026 - Condomínio Ponto Reserva</p>
-            <p class="text-xl sm:text-2xl font-light">Chapa Alvaro Dias e Érica Ventura</p>
+        <header class="header">
+            <img src="logo_ponto_reserva.jpg" alt="Logo do Condomínio Ponto Reserva" class="w-24 h-24 sm:w-32 sm:h-24 mr-0 sm:mr-6 object-contain">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-bold mb-2">Eleições para Síndico</h1>
+                <p class="text-xl sm:text-2xl font-light">Gestão 2026 - Condomínio Ponto Reserva</p>
+                <p class="text-xl sm:text-2xl font-light">Chapa Alvaro Dias e Érica Ventura</p>
+            </div>
         </header>
 
         <section class="p-6">
@@ -212,11 +227,9 @@
     </div>
 
     <script>
-        // API KEY e URL
-        const apiKey = "AIzaSyCExYe6xQOFLxmkPFhFPjZYNSEnCi9cQzc"; 
-        const apiUrl = `https://pontoreserva2026.netlify.app/.netlify/functions/api-gemini`;
-
-
+        // Use a URL do seu endpoint serverless aqui
+        const apiUrl = "URL_DO_SEU_ENDPOINT_AQUI"; 
+        
         // Elementos da UI
         const chatContainer = document.getElementById('chat-container');
         const chatInput = document.getElementById('chat-input');
@@ -253,7 +266,7 @@
             }
         }
 
-        // Envia a mensagem para a API do Gemini
+        // Envia a mensagem para a função serverless
         async function sendMessage() {
             const userQuestion = chatInput.value.trim();
             if (!userQuestion) return;
@@ -262,68 +275,26 @@
             chatInput.value = '';
             addLoadingIndicator();
 
-            const proposals = {
-                contabilidade: `Transparência e Prestação de Contas (relatórios digitais), Redução de Gastos (negociação de contratos), Geração de Receita (energia solar).`,
-                zeladoria: `Troca do piso do estacionamento, manutenção e paisagismo, piscina com ozônio, iluminação e som na área gourmet, reforma do gradil e quadra.`,
-                gestao_de_pessoas: `Valorização dos colaboradores, canal de comunicação oficial, reuniões periódicas, eventos e feirinhas.`,
-                seguranca: `Controle de acesso (leitura de placas), monitoramento com mais câmeras, parcerias com a Polícia Militar.`
-            };
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userQuestion: userQuestion })
+                });
 
-            const payload = {
-                contents: [{
-                    parts: [{
-                        text: `Atue como Álvaro, o candidato a síndico do Condomínio Ponto Reserva.
-                        Responda à seguinte pergunta baseando-se estritamente nas propostas de campanha que são:
-                        - Contabilidade: ${proposals.contabilidade}
-                        - Zeladoria: ${proposals.zeladoria}
-                        - Gestão de Pessoas: ${proposals.gestao_de_pessoas}
-                        - Segurança: ${proposals.seguranca}
-                        
-                        Seja amigável e informativo, e mantenha a resposta focada no tema. A pergunta é: "${userQuestion}"`
-                    }]
-                }],
-                systemInstruction: {
-                    parts: [{ text: "Atue como um candidato a síndico educado e confiante." }]
+                if (!response.ok) {
+                    throw new Error(`Erro na rede: ${response.status}`);
                 }
-            };
-            
-            // Tenta chamar a API, com retentativas em caso de falha.
-            const maxRetries = 5;
-            let retryCount = 0;
-            let response;
-            while(retryCount < maxRetries) {
-                try {
-                    response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
 
-                    if (response.ok) {
-                        break; // Se a resposta for OK, sai do loop
-                    }
+                const data = await response.json();
+                addMessageToChat(data.response, false);
 
-                    // Log para debug, mas sem estourar no console
-                    console.log(`Tentativa ${retryCount + 1} falhou. Código de status: ${response.status}`);
-                    retryCount++;
-                    await new Promise(res => setTimeout(res, 2 ** retryCount * 1000)); // Espera exponencial
-
-                } catch (error) {
-                    console.error('Erro na chamada da API:', error);
-                    retryCount++;
-                    await new Promise(res => setTimeout(res, 2 ** retryCount * 1000));
-                }
+            } catch (error) {
+                console.error('Erro na chamada da função serverless:', error);
+                addMessageToChat('Desculpe, não consegui me conectar. Por favor, tente novamente mais tarde.', false);
+            } finally {
+                removeLoadingIndicator();
             }
-
-            removeLoadingIndicator();
-            if (!response || !response.ok) {
-                addMessageToChat('Desculpe, não consegui processar sua pergunta no momento. Tente novamente mais tarde.', false);
-                return;
-            }
-
-            const result = await response.json();
-            const botResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-            addMessageToChat(botResponse || 'Desculpe, não entendi a pergunta.', false);
         }
 
         // Adiciona event listeners
@@ -336,6 +307,3 @@
     </script>
 </body>
 </html>
-
-
-
