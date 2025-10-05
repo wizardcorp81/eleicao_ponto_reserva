@@ -16,7 +16,8 @@
             color: #1f2937;
         }
         .container {
-            max-width: 800px;
+            /* Alterado para 900px para melhor experiência em desktop e tablet */
+            max-width: 900px; 
             margin: 0 auto;
             background-color: #ffffff;
             border-radius: 12px;
@@ -25,7 +26,8 @@
         .header {
             background-color: #7ABE59;
             color: #ffffff;
-            padding: 3rem 2rem;
+            /* Padding ajustado para telas menores */
+            padding: 1.5rem 1rem; 
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             display: flex;
@@ -36,6 +38,8 @@
         }
         @media (min-width: 640px) {
             .header {
+                /* Padding restaurado para telas maiores */
+                padding: 3rem 2rem; 
                 flex-direction: row;
                 text-align: left;
                 justify-content: flex-start;
@@ -142,7 +146,7 @@ Antes disso, trabalhei por mais de 10 anos no setor de cobrança, uma área que 
                     </p>
                 </div>
             </div>
-            <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 mt-8"> 
                 <div class="flex-shrink-0">
                     <img src="erica_profile.jpg" alt="Foto de Érica Ventura" class="rounded-full w-28 h-28 sm:w-36 sm:h-36 object-cover border-4 border-gray-200">
                 </div>
@@ -289,12 +293,10 @@ Conto com o apoio de vocês para juntos fazermos do nosso condomínio um lugar a
                 <h3 class="text-3xl font-bold text-gray-800 mb-4">✨ Pergunte ao Síndico ✨</h3>
                 <p class="text-gray-500 text-center mb-4">Tem alguma dúvida sobre nossas propostas? Pergunte diretamente aqui!</p>
                 
-                <!-- Chat Container -->
                 <div id="chat-container" class="chat-container w-full max-w-xl">
                     <div class="chat-message bot-message">Olá! Estou aqui para responder às suas perguntas sobre a nossa campanha.</div>
                 </div>
 
-                <!-- Input Field -->
                 <div class="flex w-full max-w-xl mt-4">
                     <input type="text" id="chat-input" placeholder="Digite sua pergunta..." class="flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <button id="send-btn" class="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 transition-colors">Enviar</button>
